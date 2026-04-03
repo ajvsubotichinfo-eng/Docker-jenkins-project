@@ -1,13 +1,13 @@
 pipeline {
-    // 'any' significa que Jenkins puede usar cualquier agente disponible
+    // `any` significa que Jenkins puede usar cualquier agente disponible
     agent any
 
     // Variables reutilizables en todo el pipeline
     environment {
-        IMAGE_NAME = 'enlaweb-tech'          // nombre de la imagen Docker
-        CONTAINER_NAME = 'enlaweb-container' // nombre del contenedor en ejecución
-        PORT = '8081'                        // puerto donde corre la web
-        WORKSPACE_PATH = "${WORKSPACE}"      // ruta del workspace de Jenkins
+        IMAGE_NAME = `enlaweb-tech`          // nombre de la imagen Docker
+        CONTAINER_NAME = `enlaweb-container` // nombre del contenedor en ejecución
+        PORT = `8081`                        // puerto donde corre la web
+        WORKSPACE_PATH = `${WORKSPACE}`      // ruta del workspace de Jenkins
     }
 
     stages {
@@ -18,9 +18,9 @@ pipeline {
         // Por ahora usamos el código que ya está
         // en el workspace de Jenkins.
         // ─────────────────────────────────────
-        stage('Checkout') {
+        stage(`Checkout`) {
             steps {
-                echo 'Obteniendo el código fuente...'
+                echo `Obteniendo el código fuente...`
                 checkout scm
             }
         }
@@ -30,10 +30,10 @@ pipeline {
         // Construye la imagen Docker usando
         // el Dockerfile del proyecto.
         // ─────────────────────────────────────
-        stage('Build') {
+        stage(`Build`) {
             steps {
-                echo 'Construyendo la imagen Docker...'
-                sh 'docker build -t ${IMAGE_NAME}:latest .'
+                echo `Construyendo la imagen Docker...`
+                sh `docker build -t ${IMAGE_NAME}:latest .`
             }
         }
 
@@ -43,17 +43,17 @@ pipeline {
         // y levanta uno nuevo con la imagen recién
         // construida.
         // ─────────────────────────────────────
-        stage('Deploy') {
+        stage(`Deploy`) {
             steps {
-                echo 'Desplegando el contenedor...'
+                echo `Desplegando el contenedor...`
 
-                // Detiene el contenedor anterior — el '|| true'
+                // Detiene el contenedor anterior — el `|| true`
                 // evita que el pipeline falle si no existe todavía
-                sh 'docker stop ${CONTAINER_NAME} || true'
-                sh 'docker rm ${CONTAINER_NAME} || true'
+                sh `docker stop ${CONTAINER_NAME} || true`
+                sh `docker rm ${CONTAINER_NAME} || true`
 
                 // Levanta el nuevo contenedor
-                sh 'docker run -d --name ${CONTAINER_NAME} -p ${PORT}:80 ${IMAGE_NAME}:latest'
+                sh `docker run -d --name ${CONTAINER_NAME} -p ${PORT}:80 ${IMAGE_NAME}:latest`
             }
         }
     }
@@ -64,10 +64,10 @@ pipeline {
     // ─────────────────────────────────────
     post {
         success {
-            echo '✅ Pipeline exitoso — web corriendo en localhost:${PORT}'
+            echo `✅ Pipeline exitoso — web corriendo en localhost:${PORT}`
         }
         failure {
-            echo '❌ Pipeline fallido — revisá los logs de cada stage'
+            echo `❌ Pipeline fallido — revisá los logs de cada stage`
         }
     }
 }

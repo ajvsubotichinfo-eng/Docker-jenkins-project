@@ -1,0 +1,33 @@
+# Partimos de la imagen oficial de Jenkins con Java 21
+FROM jenkins/jenkins:lts-jdk21
+
+# Cambiamos al usuario root para poder instalar paquetes
+USER root
+
+# Instalamos Docker CLI dentro del contenedor de Jenkins
+RUN apt-get update && \
+    apt-get install -y \
+        ca-certificates \
+        curl \
+        gnupg \
+        lsb-release && \
+    # Agregamos la clave GPG oficial de Docker
+    install -m 0755 -d /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg \
+        -o /etc/apt/keyrings/docker.asc && \
+    chmod a+r /etc/apt/keyrings/docker.asc && \
+    # Agregamos el repositorio oficial de Docker
+    echo "deb [arch=$(dpkg --print-architecture) \
+        signed-by=/etc/apt/keyrings/docker.asc] \
+        https://download.docker.com/linux/debian \
+        $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+        > /etc/apt/sources.list.d/docker.list && \
+    apt-get update && \
+    # Instalamos solo el cliente Docker (no el daemon)
+    # El daemon lo provee Docker Desktop de tu PC via socket
+    apt-get install -y docker-ce-cli && \
+    # Limpiamos cache para reducir el tamaño de la imagen
+    rm -rf /var/lib/apt/lists/*
+
+# Volvemos al usuario jenkins por seguridad
+USER jenkins
